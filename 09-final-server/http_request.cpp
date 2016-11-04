@@ -20,6 +20,10 @@ HttpRequest::HttpRequestParseState HttpRequest::parseRequest(Buffer& buf)
 			if (crlf) { /* 如果找到了! */
 				ok = processRequestLine(buf);
 			}
+			else {
+				hasMore = false; /* 没有找到,可能表示对方还没有发送完整的一行数据,要继续去监听客户的写事件 */
+			}
+
 			if (ok) 
 				state_ = kExpectHeaders;
 			else {
