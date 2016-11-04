@@ -13,20 +13,22 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <boost/shared_ptr.hpp>
 #include "csapp.h"
 #include "noncopyable.h"
-#include "state.h"
-#include "cache.h"
+/// #include "cache.h"
 #include "epoll_ulti.h"
 #include "mutex.h"
 #include "http_request.h"
+#include "buff.h"
 using namespace utility;
 
-class Buffer;
 /*
 * HttpHandle类主要是用于处理http请求的,更具体来说,是为了处理静态网页.
 */
 /* 这里默认是私有继承 */
+class Cache; /* 前向声明 */
+class FileInfo;
 class HttpHandle : noncopyable /* 不可以被拷贝,不可以被复制 */
 {
 public:

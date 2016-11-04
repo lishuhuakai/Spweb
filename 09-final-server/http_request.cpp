@@ -1,5 +1,5 @@
 #include "http_request.h"
-
+#include "buff.h"
 
 const char HttpRequest::rootDir_[] = "/home/lishuhuakai/WebSiteSrc/html_book_20150808/reference";
 const char HttpRequest::homePage_[] = "index.html";

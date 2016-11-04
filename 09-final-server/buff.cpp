@@ -29,3 +29,30 @@ ssize_t Buffer::readFd(int fd, int* savedErrno)
 	}
 	return n;
 }
+
+bool Buffer::getLine(char *dest, size_t len) { /* 读取一行数据 */
+	const char* end = findEOL();
+	if (end == 0) return false; /* 没有找到换行符 */
+
+	const char* start = peek();
+	assert(end >= start); /* 保证size是一个正数,然后下面static_cast转换的时候才会正确 */
+	ptrdiff_t size = end - start - 1;
+
+	if (len < static_cast<size_t>(size)) {
+		return false; /* 空间不够 */
+	}
+	std::copy(start, end - 1, dest);
+	dest[size] = 0;
+	retrieveUntil(end + 1);
+	return true;
+}
+
+void Buffer::appendStr(const char* format, ...) { /* 格式化输入 */
+	char extralbuf[256];
+	memset(extralbuf, 0, sizeof extralbuf);
+	va_list arglist;
+	va_start(arglist, format);
+	vsnprintf(extralbuf, sizeof extralbuf, format, arglist);
+	va_end(arglist);
+	append(extralbuf, strlen(extralbuf));
+}

@@ -9,7 +9,6 @@
 #include <stdio.h>
 #include <stddef.h>
 #include <errno.h>
-#include "epoll_ulti.h"
 #include <sys/socket.h>
 
 class Buffer
@@ -51,22 +50,7 @@ public:
 		const char* crlf = std::search(peek(), beginWrite(), kCRLF, kCRLF + 2);
 		return crlf == beginWrite() ? NULL : crlf;
 	}
-	bool getLine(char *dest, size_t len) { /* 读取一行数据 */
-		const char* end = findEOL();
-		if (end == 0) return false; /* 没有找到换行符 */
-
-		const char* start = peek();
-		assert(end >= start); /* 保证size是一个正数,然后下面static_cast转换的时候才会正确 */
-		ptrdiff_t size = end - start - 1;
-
-		if (len < static_cast<size_t>(size)) {
-			return false; /* 空间不够 */
-		}
-		std::copy(start, end - 1, dest);
-		dest[size] = 0;
-		retrieveUntil(end + 1);
-		return true;
-	}
+	bool getLine(char *dest, size_t len); /* 读取一行数据 */
 
 	const char* findEOF() const {
 		const void* eol = memchr(peek(), '\n', readableBytes());
@@ -110,21 +94,12 @@ public:
 	}
 
 	 void  append(const char* data, size_t len) {
-		 //mylog("before append");
 		ensureWritableBytes(len);
 		std::copy(data, data + len, beginWrite());
 		hasWritten(len);
 	}
 
-	void appendStr(const char* format, ...) { /* 格式化输入 */
-		char extralbuf[256];
-		memset(extralbuf, 0, sizeof extralbuf);
-		va_list arglist;
-		va_start(arglist, format);
-		vsnprintf(extralbuf, sizeof extralbuf, format, arglist);
-		va_end(arglist);
-		append(extralbuf, strlen(extralbuf));
-	}
+	void appendStr(const char* format, ...); /* 格式化输入 */
 
 	char* beginWrite() { /* 写入的起始地方 */
 		return begin() + writerIndex_;

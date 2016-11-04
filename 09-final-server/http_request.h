@@ -1,9 +1,11 @@
 #ifndef _HTTP_REQUEST_H_
 #define _HTTP_REQUEST_H_
 #include <string>
-#include "buff.h"
+#include "noncopyable.h"
+
 class Buffer;
-class HttpRequest
+
+class HttpRequest : noncopyable
 {
 public:
 	enum HttpRequestParseState
@@ -38,7 +40,6 @@ private:
 	static const char homePage_[]; /* 所指代的网页 */
 	void setMethod(const char* start, size_t len);
 	void setPath(const char* start, size_t len);
-	
 };
 
 #endif

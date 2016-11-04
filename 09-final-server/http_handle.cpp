@@ -1,4 +1,5 @@
 #include "http_handle.h"
+#include "cache.h"
 
 Cache g_cache;
 Cache& HttpHandle::cache_ = g_cache;
@@ -47,8 +48,7 @@ void HttpHandle::processRead()
 	* 当然,我这里并没有处理request是错误的情况,这里假设request都是正确的,否则的话,就要关闭连接了.
 	*/
 	HttpRequest::HttpRequestParseState state = request_.parseRequest(readBuffer_);
-	if (state == HttpRequest::kError) /* 如果处理不成功,就要返回 */
-	{
+	if (state == HttpRequest::kError)  { /* 如果处理不成功,就要返回 */
 		state_ = kError; /* 解析出错 */
 		return;
 	}
