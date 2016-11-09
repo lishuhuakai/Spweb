@@ -37,19 +37,6 @@ namespace utility
 	typedef struct sockaddr SA;
 	/* $end sockaddrdef */
 
-	/* Persistent state for the robust I/O (Rio) package */
-	/* $begin rio_t */
-#define RIO_BUFSIZE 8192
-	typedef struct {
-		int rio_fd;                /* descriptor for this internal buf */
-		int rio_cnt;               /* unread bytes in internal buf */
-		char *rio_bufptr;          /* next unread byte in internal buf */
-		char rio_buf[RIO_BUFSIZE]; /* internal buffer */
-	} rio_t;
-	/* $end rio_t */
-
-	/* External variables */
-	extern int h_errno;    /* defined by BIND for DNS errors */
 	extern char **environ; /* defined by libc */
 
 						   /* Misc constants */
@@ -58,10 +45,9 @@ namespace utility
 #define LISTENQ  1024  /* second argument to listen() */
 
 						   /* Our own error-handling functions */
-	void unix_error(char *msg);
-	void posix_error(int code, char *msg);
-	void dns_error(char *msg);
-	void app_error(char *msg);
+	void unix_error(const char *msg);
+	void posix_error(int code, const char *msg);
+	void app_error(const char *msg);
 
 	/* Process control wrappers */
 	pid_t Fork(void);
@@ -101,15 +87,6 @@ namespace utility
 	void *Mmap(void *addr, size_t len, int prot, int flags, int fd, off_t offset);
 	void Munmap(void *start, size_t length);
 
-	/* Standard I/O wrappers */
-	void Fclose(FILE *fp);
-	FILE *Fdopen(int fd, const char *type);
-	char *Fgets(char *ptr, int n, FILE *stream);
-	FILE *Fopen(const char *filename, const char *mode);
-	void Fputs(const char *ptr, FILE *stream);
-	size_t Fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
-	void Fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
-
 	/* Dynamic storage allocation wrappers */
 	void *Malloc(size_t size);
 	void *Realloc(void *ptr, size_t size);
@@ -138,11 +115,9 @@ namespace utility
 	void Pthread_once(pthread_once_t *once_control, void(*init_function)());
 
 	/* Client/server helper functions */
-	int open_clientfd(char *hostname, int portno);
 	int open_listenfd(int portno);
 
 	/* Wrappers for client/server helper functions */
-	int Open_clientfd(char *hostname, int port);
 	int Open_listenfd(int port);
 
 }

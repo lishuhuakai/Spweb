@@ -1,4 +1,5 @@
 #include "cache.h"
+#include <boost/make_shared.hpp>
 
 /* 线程安全版本的getFileAddr */
 void Cache::getFileAddr(std::string fileName, int fileSize, boost::shared_ptr<FileInfo>& ptr) {
@@ -13,7 +14,8 @@ void Cache::getFileAddr(std::string fileName, int fileSize, boost::shared_ptr<Fi
 	if (cache_.size() >= MAX_CACHE_SIZE) { /* 文件数目过多,需要删除一个元素 */
 		cache_.erase(cache_.begin()); /* 直接移除掉最前一个元素 */
 	}
-	boost::shared_ptr<FileInfo> fileInfo(new FileInfo(fileName, fileSize));
+	//boost::shared_ptr<FileInfo> fileInfo(new FileInfo(fileName, fileSize));
+	boost::shared_ptr<FileInfo> fileInfo = boost::make_shared<FileInfo>(fileName, fileSize);
 	cache_[fileName] = fileInfo;
 	ptr = std::move(fileInfo); /* 直接使用move语义 */
 }
@@ -27,7 +29,8 @@ boost::shared_ptr<FileInfo> Cache::getFileAddr(std::string fileName, int fileSiz
 		cache_.erase(cache_.begin()); /* 直接移除掉最前一个元素 */
 	}
 	/* 没有找到的话,我们需要加载文件 */
-	boost::shared_ptr<FileInfo> fileInfo(new FileInfo(fileName, fileSize));
+	boost::shared_ptr<FileInfo> fileInfo = boost::make_shared<FileInfo>(fileName, fileSize);
+	//boost::shared_ptr<FileInfo> fileInfo(new FileInfo(fileName, fileSize)); /* 使用make_shared效率更高,尽量不使用new */
 	cache_[fileName] = fileInfo;
 	return fileInfo;
 }

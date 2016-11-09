@@ -9,26 +9,26 @@ namespace utility
 	**************************/
 	/* $begin errorfuns */
 	/* $begin unixerror */
-	void unix_error(char *msg) /* unix-style error */
+	void unix_error(const char *msg) /* unix-style error */
 	{
 		fprintf(stderr, "%s: %s\n", msg, strerror(errno));
 		exit(0);
 	}
 	/* $end unixerror */
 
-	void posix_error(int code, char *msg) /* posix-style error */
+	void posix_error(int code, const char *msg) /* posix-style error */
 	{
 		fprintf(stderr, "%s: %s\n", msg, strerror(code));
 		exit(0);
 	}
 
-	void dns_error(char *msg) /* dns-style error */
+	void dns_error(const char *msg) /* dns-style error */
 	{
 		fprintf(stderr, "%s: DNS error %d\n", msg, h_errno);
 		exit(0);
 	}
 
-	void app_error(char *msg) /* application error */
+	void app_error(const char *msg) /* application error */
 	{
 		fprintf(stderr, "%s\n", msg);
 		exit(0);
@@ -313,67 +313,6 @@ namespace utility
 		free(ptr);
 	}
 
-	/******************************************
-	* Wrappers for the Standard I/O functions.
-	******************************************/
-	void Fclose(FILE *fp)
-	{
-		if (fclose(fp) != 0)
-			unix_error("Fclose error");
-	}
-
-	FILE *Fdopen(int fd, const char *type)
-	{
-		FILE *fp;
-
-		if ((fp = fdopen(fd, type)) == NULL)
-			unix_error("Fdopen error");
-
-		return fp;
-	}
-
-	char *Fgets(char *ptr, int n, FILE *stream)
-	{
-		char *rptr;
-
-		if (((rptr = fgets(ptr, n, stream)) == NULL) && ferror(stream))
-			app_error("Fgets error");
-
-		return rptr;
-	}
-
-	FILE *Fopen(const char *filename, const char *mode)
-	{
-		FILE *fp;
-
-		if ((fp = fopen(filename, mode)) == NULL)
-			unix_error("Fopen error");
-
-		return fp;
-	}
-
-	void Fputs(const char *ptr, FILE *stream)
-	{
-		if (fputs(ptr, stream) == EOF)
-			unix_error("Fputs error");
-	}
-
-	size_t Fread(void *ptr, size_t size, size_t nmemb, FILE *stream)
-	{
-		size_t n;
-
-		if (((n = fread(ptr, size, nmemb, stream)) < nmemb) && ferror(stream))
-			unix_error("Fread error");
-		return n;
-	}
-
-	void Fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream)
-	{
-		if (fwrite(ptr, size, nmemb, stream) < nmemb)
-			unix_error("Fwrite error");
-	}
-
-
 	/****************************
 	* Sockets interface wrappers
 	****************************/
@@ -493,37 +432,6 @@ namespace utility
 	/********************************
 	* Client/server helper functions
 	********************************/
-	/*
-	* open_clientfd - open connection to server at <hostname, port>
-	*   and return a socket descriptor ready for reading and writing.
-	*   Returns -1 and sets errno on Unix error.
-	*   Returns -2 and sets h_errno on DNS (gethostbyname) error.
-	*/
-	/* $begin open_clientfd */
-	int open_clientfd(char *hostname, int port)
-	{
-		int clientfd;
-		struct hostent *hp;
-		struct sockaddr_in serveraddr;
-
-		if ((clientfd = socket(AF_INET, SOCK_STREAM, 0)) < 0)
-			return -1; /* check errno for cause of error */
-
-					   /* Fill in the server's IP address and port */
-		if ((hp = gethostbyname(hostname)) == NULL)
-			return -2; /* check h_errno for cause of error */
-		bzero((char *)&serveraddr, sizeof(serveraddr));
-		serveraddr.sin_family = AF_INET;
-		bcopy((char *)hp->h_addr_list[0],
-			(char *)&serveraddr.sin_addr.s_addr, hp->h_length);
-		serveraddr.sin_port = htons(port);
-
-		/* Establish a connection with the server */
-		if (connect(clientfd, (SA *)&serveraddr, sizeof(serveraddr)) < 0)
-			return -1;
-		return clientfd;
-	}
-	/* $end open_clientfd */
 
 	/*
 	* open_listenfd - open and return a listening socket on port
@@ -560,21 +468,6 @@ namespace utility
 	}
 	/* $end open_listenfd */
 
-	/******************************************
-	* Wrappers for the client/server helper routines
-	******************************************/
-	int Open_clientfd(char *hostname, int port)
-	{
-		int rc;
-
-		if ((rc = open_clientfd(hostname, port)) < 0) {
-			if (rc == -1)
-				unix_error("Open_clientfd Unix error");
-			else
-				dns_error("Open_clientfd DNS error");
-		}
-		return rc;
-	}
 
 	int Open_listenfd(int port)
 	{
